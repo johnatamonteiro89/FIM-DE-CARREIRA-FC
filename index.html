@@ -148,7 +148,7 @@
     }
 
     textarea {
-      height: 130px;
+      height: 120px;
       resize: vertical;
     }
 
@@ -401,19 +401,18 @@
       margin-bottom: 4px;
     }
 
-    .banner-preview-box {
-      margin-top: 15px;
-      border: 2px dashed var(--border-color);
+    .prompt-box {
+      background-color: #111;
+      border: 1px solid var(--yellow);
       border-radius: 8px;
-      text-align: center;
-      background: #000;
-      padding: 10px;
-    }
-
-    canvas {
-      max-width: 100%;
-      height: auto;
-      border-radius: 6px;
+      padding: 12px;
+      font-family: monospace;
+      color: #00ffcc;
+      font-size: 0.85rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+      min-height: 100px;
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -421,11 +420,8 @@
 
   <header>
     <div class="header-images">
-      <!-- ESCUDO PRINCIPAL FDC 2016 -->
       <img src="340.png" alt="Emblema Fim de Carreira F.C.">
-      <!-- EMBLEMA DE ANIVERSÁRIO (FALLBACK CASO NÃO EXISTIR) -->
       <img src="aniversario.png" alt="Emblema Aniversário" onerror="this.src='287_2.png'">
-      <!-- MASCOTE DA BENGALA -->
       <img src="287_2.png" alt="Mascote Fim de Carreira F.C.">
     </div>
     <h1>Fim de Carreira F.C.</h1>
@@ -495,9 +491,7 @@
     <div id="matches-tab" class="tab-content">
       <section class="card">
         <h2>Sortear Confrontos</h2>
-        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px;">
-          Gera partidas aleatórias entre os times formados ou participantes.
-        </p>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px;">Gera partidas aleatórias entre os participantes.</p>
         <button onclick="generateMatches()" class="btn">Gerar Partidas</button>
       </section>
 
@@ -519,56 +513,49 @@
 
       <section class="card">
         <h2>Chaves do Torneio</h2>
-        <p style="font-size: 0.85rem; color: var(--yellow); margin-bottom: 15px;">
-          💡 Dica: Clique no time vencedor para avançá-lo de fase!
-        </p>
+        <p style="font-size: 0.85rem; color: var(--yellow); margin-bottom: 15px;">💡 Dica: Clique no time vencedor para avançá-lo de fase!</p>
         <div id="tournament-bracket" class="bracket">
           <p style="color: var(--text-muted);">Clique em "Iniciar Torneio" para gerar as chaves.</p>
         </div>
       </section>
     </div>
 
-    <!-- ABA 5: EDITOR DE SÚMULA, AMISTOSOS E BANNER -->
+    <!-- ABA 5: EDITOR DE SÚMULA E GERADOR DE PROMPT -->
     <div id="history-matches-tab" class="tab-content">
       <div class="grid-2">
         <section class="card" id="form-card">
-          <h2 id="form-title">📝 Editor de Súmula / Registrar Jogo</h2>
+          <h2 id="form-title">📝 Súmula de Amistosos</h2>
           
           <input type="hidden" id="editing-match-id" value="">
 
           <div class="form-group">
             <label>Adversário / Nome do Jogo</label>
-            <input type="text" id="match-opponent" placeholder="Ex: Uz canadense" oninput="generateCanvasBanner()">
+            <input type="text" id="match-opponent" placeholder="Ex: Uz canadense" oninput="updatePrompt()">
           </div>
 
           <div style="display: flex; gap: 10px;">
             <div class="form-group" style="flex: 1;">
               <label>Mando de Campo</label>
-              <select id="match-venue-type" onchange="generateCanvasBanner()">
-                <option value="home">Em Casa (Nosso time na Esquerda)</option>
-                <option value="away">Fora (Nosso time na Direita)</option>
+              <select id="match-venue-type" onchange="updatePrompt()">
+                <option value="home">Em Casa</option>
+                <option value="away">Fora de Casa</option>
               </select>
             </div>
             <div class="form-group" style="flex: 1;">
               <label>Local do Jogo</label>
-              <input type="text" id="match-location" placeholder="Ex: Arena Fim de Carreira" oninput="generateCanvasBanner()">
+              <input type="text" id="match-location" placeholder="Ex: Arena Fim de Carreira" oninput="updatePrompt()">
             </div>
           </div>
 
           <div style="display: flex; gap: 10px;">
             <div class="form-group" style="flex: 1;">
               <label>Data</label>
-              <input type="date" id="match-date" onchange="generateCanvasBanner()">
+              <input type="date" id="match-date" onchange="updatePrompt()">
             </div>
             <div class="form-group" style="flex: 1;">
               <label>Horário</label>
-              <input type="time" id="match-time" onchange="generateCanvasBanner()">
+              <input type="time" id="match-time" onchange="updatePrompt()">
             </div>
-          </div>
-
-          <div class="form-group">
-            <label>Escudo do Adversário (Opcional)</label>
-            <input type="file" id="match-opponent-logo" accept="image/*" onchange="handleOpponentLogo(event)">
           </div>
 
           <div style="display: flex; gap: 10px;">
@@ -594,7 +581,7 @@
 
           <div class="form-group">
             <label>Goleiro / Levou os gols</label>
-            <input type="text" id="match-conceded-by" placeholder="Ex: Goleiro Denis (sofreu 2 gols)">
+            <input type="text" id="match-conceded-by" placeholder="Ex: Goleiro Denis">
           </div>
 
           <button onclick="saveMatchRecord()" id="btn-save-match" class="btn">Salvar Jogo na Súmula</button>
@@ -602,11 +589,14 @@
         </section>
 
         <section class="card">
-          <h2>Banner Oficial do Amistoso</h2>
-          <div class="banner-preview-box">
-            <canvas id="bannerCanvas" width="800" height="450"></canvas>
-          </div>
-          <button id="download-banner-btn" class="btn" style="background:#f39c12; color:#000;" onclick="downloadBanner()">Baixar Imagem do Banner</button>
+          <h2>🤖 Prompt para IA (Gerador de Banner)</h2>
+          <p style="color: var(--text-muted); font-size: 0.85rem;">
+            Copie o comando abaixo e cole no Midjourney, ChatGPT Plus, DALL-E 3 ou Bing Image Creator para criar a arte oficial:
+          </p>
+
+          <div class="prompt-box" id="prompt-output">Preencha os dados da partida ao lado para gerar o prompt...</div>
+
+          <button class="btn" style="background:#2ecc71; color:#000;" onclick="copyPrompt()">📋 Copiar Prompt de Imagem</button>
 
           <h2 style="margin-top: 25px;">
             Partidas Registradas
@@ -633,7 +623,6 @@
     let history = JSON.parse(localStorage.getItem('fc_history')) || [];
     let lastGeneratedTeams = JSON.parse(localStorage.getItem('fc_teams')) || [];
     let playedMatches = JSON.parse(localStorage.getItem('fc_matches')) || [];
-    let opponentLogoImg = null;
 
     window.addEventListener('DOMContentLoaded', () => {
       const savedNames = localStorage.getItem('fc_names');
@@ -648,7 +637,7 @@
       const today = new Date().toISOString().split('T')[0];
       document.getElementById('match-date').value = today;
 
-      generateCanvasBanner();
+      updatePrompt();
     });
 
     function switchTab(tabId) {
@@ -694,7 +683,8 @@
         }
       }, 70);
     });
-function finishDraw(names, qty) {
+
+    function finishDraw(names, qty) {
       winnerDisplay.classList.remove('animating');
       const shuffled = [...names].sort(() => 0.5 - Math.random());
       const selected = shuffled.slice(0, qty);
@@ -861,8 +851,7 @@ function finishDraw(names, qty) {
         renderTournament();
       }
     }
-
-    // EDITOR E REGISTRO DE SÚMULA
+     // EDITOR E REGISTRO DE SÚMULA
     function saveMatchRecord() {
       const editingId = document.getElementById('editing-match-id').value;
       const opponent = document.getElementById('match-opponent').value.trim();
@@ -881,7 +870,6 @@ function finishDraw(names, qty) {
       const formattedDate = rawDate ? rawDate.split('-').reverse().join('/') : 'Data N/I';
 
       if (editingId) {
-        // Atualiza partida existente
         const index = playedMatches.findIndex(m => m.id == editingId);
         if (index !== -1) {
           playedMatches[index] = {
@@ -900,7 +888,6 @@ function finishDraw(names, qty) {
           };
         }
       } else {
-        // Cria nova partida
         const matchData = {
           id: Date.now(),
           opponent,
@@ -943,7 +930,7 @@ function finishDraw(names, qty) {
       document.getElementById('btn-save-match').innerText = 'Atualizar Súmula';
       document.getElementById('btn-cancel-edit').style.display = 'block';
 
-      generateCanvasBanner();
+      updatePrompt();
       document.getElementById('form-card').scrollIntoView({ behavior: 'smooth' });
     }
 
@@ -955,12 +942,13 @@ function finishDraw(names, qty) {
       document.getElementById('match-scorers').value = '';
       document.getElementById('match-conceded-by').value = '';
 
-      document.getElementById('form-title').innerText = '📝 Editor de Súmula / Registrar Jogo';
+      document.getElementById('form-title').innerText = '📝 Súmula de Amistosos';
       document.getElementById('btn-save-match').innerText = 'Salvar Jogo na Súmula';
       document.getElementById('btn-cancel-edit').style.display = 'none';
 
-      generateCanvasBanner();
+      updatePrompt();
     }
+
     function renderMatchHistory() {
       const container = document.getElementById('matches-history-list');
       if (playedMatches.length === 0) {
@@ -1002,124 +990,30 @@ function finishDraw(names, qty) {
       }
     }
 
-    // HANDLER DE LOGO DO ADVERSÁRIO
-    function handleOpponentLogo(event) {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          opponentLogoImg = new Image();
-          opponentLogoImg.src = e.target.result;
-          opponentLogoImg.onload = () => generateCanvasBanner();
-        };
-        reader.readAsDataURL(file);
-      } else {
-        opponentLogoImg = null;
-        generateCanvasBanner();
-      }
-    }
-
-    // BANNER DINÂMICO
-    function generateCanvasBanner() {
-      const canvas = document.getElementById('bannerCanvas');
-      const ctx = canvas.getContext('2d');
-
-      const opponent = document.getElementById('match-opponent').value.trim() || "ADVERSÁRIO";
-      const location = document.getElementById('match-location').value.trim() || "LOCAL A DEFINIR";
+    // GERADOR DE PROMPT PARA IA EXTERNA
+    function updatePrompt() {
+      const opponent = document.getElementById('match-opponent').value.trim() || "[NOME DO ADVERSÁRIO]";
+      const location = document.getElementById('match-location').value.trim() || "[LOCAL DA PARTIDA]";
       const venueType = document.getElementById('match-venue-type').value;
       const rawDate = document.getElementById('match-date').value;
-      const dateStr = rawDate ? rawDate.split('-').reverse().join('/') : "EM BREVE";
-      const timeStr = document.getElementById('match-time').value ? `ÀS ${document.getElementById('match-time').value}` : "";
+      const dateStr = rawDate ? rawDate.split('-').reverse().join('/') : "[DATA]";
+      const timeStr = document.getElementById('match-time').value || "[HORÁRIO]";
 
       const homeTeam = venueType === 'home' ? "FIM DE CARREIRA F.C." : opponent.toUpperCase();
       const awayTeam = venueType === 'home' ? opponent.toUpperCase() : "FIM DE CARREIRA F.C.";
 
-      // Fundo Gradiente Dourado / Escuro
-      const grad = ctx.createLinearGradient(0, 0, 800, 450);
-      grad.addColorStop(0, '#0a0a0a');
-      grad.addColorStop(0.5, '#151205');
-      grad.addColorStop(1, '#0a0a0a');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, 800, 450);
+      const promptText = `Soccer match day announcement poster, epic sports design style. Black and gold theme with stadium lighting effects, dramatic cinematic shadows. Text clearly visible: "${homeTeam} vs ${awayTeam}". Subtitle text: "${dateStr} at ${timeStr} - ${location.toUpperCase()}". Features a old-man cartoon mascot with a walking cane and soccer ball on one side, modern geometric shield emblem with vertical black and yellow stripes. High resolution, 8k, professional graphic design --ar 16:9`;
 
-      // Moldura Dourada Dupla
-      ctx.strokeStyle = '#f1c40f';
-      ctx.lineWidth = 6;
-      ctx.strokeRect(12, 12, 776, 426);
-      ctx.strokeStyle = '#333';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(20, 20, 760, 410);
-
-      // Cabeçalho
-      ctx.fillStyle = '#f1c40f';
-      ctx.font = '900 22px "Segoe UI", sans-serif';
-      ctx.textAlign = 'center';
-      const venueTitle = venueType === 'home' ? '⚡ JOGO EM CASA / AMISTOSO ⚡' : '⚡ JOGO FORA DE CASA / AMISTOSO ⚡';
-      ctx.fillText(venueTitle, 400, 50);
-
-      // Selo de Aniversário Centralizado no Topo
-      const niverImg = new Image();
-      niverImg.src = 'aniversario.png';
-      niverImg.onload = () => ctx.drawImage(niverImg, 365, 60, 70, 70);
-      niverImg.onerror = () => {
-        const mascot = new Image();
-        mascot.src = '287_2.png';
-        mascot.onload = () => ctx.drawImage(mascot, 365, 60, 70, 70);
-      };
-
-      // Nomes dos Times
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 26px "Segoe UI", sans-serif';
-      ctx.fillText(homeTeam, 220, 230);
-      ctx.fillText(awayTeam, 580, 230);
-
-      // VS Centralizado
-      ctx.fillStyle = '#f1c40f';
-      ctx.font = '900 42px "Segoe UI", sans-serif';
-      ctx.fillText('VS', 400, 235);
-
-      // Data, Hora e Local do Jogo
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 20px "Segoe UI", sans-serif';
-      ctx.fillText(`📅 ${dateStr}  ${timeStr}`, 400, 340);
-
-      ctx.fillStyle = '#f1c40f';
-      ctx.font = '600 18px "Segoe UI", sans-serif';
-      ctx.fillText(`📍 ${location.toUpperCase()}`, 400, 375);
-
-      // Escudos (Esquerda vs Direita)
-      const ourShield = new Image();
-      ourShield.src = '340.png'; // Atualizado para o escudo oficial 2016
-
-      ourShield.onload = () => {
-        const ourX = venueType === 'home' ? 170 : 530;
-        ctx.drawImage(ourShield, ourX, 90, 100, 100);
-
-        const opponentX = venueType === 'home' ? 530 : 170;
-        if (opponentLogoImg) {
-          ctx.drawImage(opponentLogoImg, opponentX, 90, 100, 100);
-        } else {
-          ctx.beginPath();
-          ctx.arc(opponentX + 50, 140, 45, 0, Math.PI * 2);
-          ctx.fillStyle = '#222';
-          ctx.fill();
-          ctx.strokeStyle = '#f1c40f';
-          ctx.lineWidth = 3;
-          ctx.stroke();
-
-          ctx.fillStyle = '#aaa';
-          ctx.font = 'bold 16px "Segoe UI", sans-serif';
-          ctx.fillText('RIVAL', opponentX + 50, 145);
-        }
-      };
+      document.getElementById('prompt-output').textContent = promptText;
     }
 
-    function downloadBanner() {
-      const canvas = document.getElementById('bannerCanvas');
-      const a = document.createElement('a');
-      a.download = 'banner-amistoso-fim-de-carreira.png';
-      a.href = canvas.toDataURL('image/png');
-      a.click();
+    function copyPrompt() {
+      const promptText = document.getElementById('prompt-output').textContent;
+      navigator.clipboard.writeText(promptText).then(() => {
+        alert('Prompt copiado com sucesso! Agora é só colar na sua IA de imagem favorita.');
+      }).catch(err => {
+        alert('Erro ao copiar prompt.');
+      });
     }
   </script>
 </body>
